@@ -10,10 +10,53 @@ type NewsItem = {
   snippet: string;
   pubDate: Date | null;
   sourceName: string;
+  images: string[];
 };
 
 const MAX_ITEMS = 15;
 const MAX_AGE_HOURS = 72;
+const MAX_IMAGES = 6;
+
+// Extrai as imagens de um item RSS: campos de mídia (media:content/thumbnail,
+// enclosure) e as <img> embutidas no HTML do conteúdo. Filtra ícones/pixels e
+// mantém só https, sem duplicatas.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractImages(item: any): string[] {
+  const urls: string[] = [];
+
+  const media = item["media:content"] ?? item.mediaContent;
+  for (const m of Array.isArray(media) ? media : media ? [media] : []) {
+    const url = m?.$?.url ?? m?.url;
+    if (url) urls.push(String(url));
+  }
+  const thumb = item["media:thumbnail"] ?? item.mediaThumbnail;
+  const thumbUrl = thumb?.$?.url ?? thumb?.url;
+  if (thumbUrl) urls.push(String(thumbUrl));
+
+  if (item.enclosure?.url && /^image\//i.test(item.enclosure.type ?? "image/")) {
+    urls.push(String(item.enclosure.url));
+  }
+
+  const html: string =
+    item["content:encoded"] ?? item.content ?? item.summary ?? "";
+  for (const m of html.matchAll(/<img[^>]+src=["']([^"']+)["']/gi)) {
+    urls.push(m[1]);
+  }
+
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of urls) {
+    const url = raw.trim();
+    if (!/^https:\/\//i.test(url)) continue; // só https (evita mixed content)
+    if (/\b(1x1|pixel|spacer|blank|transparent|avatar|logo|selo)\b/i.test(url))
+      continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(url);
+    if (out.length >= MAX_IMAGES) break;
+  }
+  return out;
+}
 
 async function fetchNews(categorySlug: string): Promise<NewsItem[]> {
   const category = getCategory(categorySlug);
@@ -21,7 +64,15 @@ async function fetchNews(categorySlug: string): Promise<NewsItem[]> {
 
   // Busca com fetch nativo (o cliente HTTP do rss-parser não descomprime
   // respostas gzip, que alguns veículos como o G1 sempre enviam)
-  const parser = new Parser();
+  const parser = new Parser({
+    customFields: {
+      item: [
+        ["media:content", "media:content", { keepArray: true }],
+        ["media:thumbnail", "media:thumbnail"],
+        ["content:encoded", "content:encoded"],
+      ],
+    },
+  });
   const results = await Promise.allSettled(
     category.feeds.map(async (feed) => {
       const res = await fetch(feed.url, {
@@ -45,6 +96,7 @@ async function fetchNews(categorySlug: string): Promise<NewsItem[]> {
             .slice(0, 400),
           pubDate: item.isoDate ? new Date(item.isoDate) : null,
           sourceName: feed.name,
+          images: extractImages(item),
         })
       );
     })
@@ -223,6 +275,8 @@ export async function runRobot(categorySlug: string): Promise<Post> {
     tags: draft.tags.join(","),
     sourceUrl: draft.source.link,
     sourceName: draft.source.sourceName,
+    coverImage: draft.source.images[0] ?? null,
+    images: draft.source.images,
     aiGenerated: true,
     published: true,
   });

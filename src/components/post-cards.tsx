@@ -19,6 +19,26 @@ function Meta({ post }: { post: Post }) {
   );
 }
 
+function Cover({
+  src,
+  className = "",
+}: {
+  src: string;
+  className?: string;
+}) {
+  return (
+    <div className={`overflow-hidden rounded-xl bg-surface ${className}`}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt=""
+        loading="lazy"
+        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+      />
+    </div>
+  );
+}
+
 export function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-4">
@@ -37,6 +57,9 @@ export function FeaturedPost({ post }: { post: Post }) {
         href={`/post/${post.slug}`}
         className="block rounded-2xl border border-border bg-surface p-7 transition-all duration-300 hover:border-accent/50 hover:shadow-xl hover:shadow-accent/5 sm:p-10"
       >
+        {post.coverImage && (
+          <Cover src={post.coverImage} className="mb-7 aspect-[16/8]" />
+        )}
         <div className="flex flex-wrap items-center gap-3">
           <Kicker post={post} />
           <Meta post={post} />
@@ -74,6 +97,9 @@ export function PostCard({ post }: { post: Post }) {
         href={`/post/${post.slug}`}
         className="flex h-full flex-col rounded-xl border border-border bg-surface p-6 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent/50 hover:shadow-lg hover:shadow-accent/5"
       >
+        {post.coverImage && (
+          <Cover src={post.coverImage} className="mb-5 aspect-[16/9]" />
+        )}
         <Kicker post={post} />
         <h3 className="mt-3 text-balance font-serif text-xl leading-snug tracking-tight transition-colors group-hover:text-accent">
           {post.title}
@@ -94,17 +120,23 @@ export function PostRow({ post }: { post: Post }) {
     <article className="group">
       <Link
         href={`/post/${post.slug}`}
-        className="flex items-baseline justify-between gap-6 py-5"
+        className="flex items-center justify-between gap-4 py-5"
       >
         <div className="min-w-0">
           <Kicker post={post} />
           <h3 className="mt-1.5 font-medium leading-snug transition-colors group-hover:text-accent">
             {post.title}
           </h3>
+          <span className="mt-1.5 block text-xs text-muted">
+            {formatDate(post.createdAt)}
+          </span>
         </div>
-        <span className="shrink-0 text-xs text-muted">
-          {formatDate(post.createdAt)}
-        </span>
+        {post.coverImage && (
+          <Cover
+            src={post.coverImage}
+            className="hidden aspect-[4/3] w-24 shrink-0 sm:block"
+          />
+        )}
       </Link>
     </article>
   );

@@ -100,6 +100,8 @@ type CreatePostData = {
   tags?: string;
   sourceUrl?: string | null;
   sourceName?: string | null;
+  coverImage?: string | null;
+  images?: string[];
   aiGenerated?: boolean;
   published?: boolean;
 };
@@ -116,6 +118,8 @@ export async function createPost(input: CreatePostData): Promise<Post> {
       tags: input.tags ?? "",
       source_url: input.sourceUrl ?? null,
       source_name: input.sourceName ?? null,
+      cover_image: input.coverImage ?? null,
+      images: input.images ?? [],
       ai_generated: input.aiGenerated ?? false,
       published: input.published ?? true,
     })

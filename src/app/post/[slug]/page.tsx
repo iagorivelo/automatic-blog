@@ -25,6 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: post.excerpt,
       type: "article",
       publishedTime: post.createdAt.toISOString(),
+      ...(post.coverImage ? { images: [post.coverImage] } : {}),
     },
   };
 }

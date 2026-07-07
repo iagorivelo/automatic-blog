@@ -15,6 +15,8 @@ type Database = {
           tags: string;
           source_url: string | null;
           source_name: string | null;
+          cover_image: string | null;
+          images: string[];
           ai_generated: boolean;
           published: boolean;
           created_at: string;
@@ -30,6 +32,8 @@ type Database = {
           tags?: string;
           source_url?: string | null;
           source_name?: string | null;
+          cover_image?: string | null;
+          images?: string[];
           ai_generated?: boolean;
           published?: boolean;
           created_at?: string;
@@ -68,6 +72,8 @@ export type Post = {
   tags: string;
   sourceUrl: string | null;
   sourceName: string | null;
+  coverImage: string | null;
+  images: string[];
   aiGenerated: boolean;
   published: boolean;
   createdAt: Date;
@@ -86,6 +92,8 @@ export function rowToPost(row: Record<string, unknown>): Post {
     tags: (row.tags as string) ?? "",
     sourceUrl: (row.source_url as string) ?? null,
     sourceName: (row.source_name as string) ?? null,
+    coverImage: (row.cover_image as string) ?? null,
+    images: Array.isArray(row.images) ? (row.images as string[]) : [],
     aiGenerated: row.ai_generated as boolean,
     published: row.published as boolean,
     createdAt: new Date(row.created_at as string),

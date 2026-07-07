@@ -13,6 +13,8 @@ create table if not exists public.posts (
   tags         text        not null default '',
   source_url   text,
   source_name  text,
+  cover_image  text,
+  images       jsonb       not null default '[]'::jsonb,
   ai_generated boolean     not null default false,
   published    boolean     not null default true,
   created_at   timestamptz not null default now(),

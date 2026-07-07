@@ -3,6 +3,7 @@ import remarkGfm from "remark-gfm";
 import type { Post } from "@/lib/supabase";
 import { getCategory } from "@/lib/feeds";
 import { formatDate, readingTime } from "@/lib/utils";
+import { ImageGallery } from "@/components/image-gallery";
 
 type Props = {
   post: Post;
@@ -52,6 +53,10 @@ export function PostArticle({ post, variant = "page", actions }: Props) {
           {post.excerpt}
         </p>
       </header>
+
+      {post.images.length > 0 && (
+        <ImageGallery images={post.images} alt={post.title} compact={isModal} />
+      )}
 
       <div className="mt-8 h-px bg-border" aria-hidden />
 
