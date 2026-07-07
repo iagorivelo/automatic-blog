@@ -1,9 +1,8 @@
 import Parser from "rss-parser";
 import { GoogleGenAI, Type, type GenerateContentConfig } from "@google/genai";
-import { prisma } from "@/lib/prisma";
+import { getPostsBySourceUrls, createPost, slugExists, type Post } from "@/lib/posts";
 import { getCategory } from "@/lib/feeds";
 import { slugify } from "@/lib/utils";
-import type { Post } from "@prisma/client";
 
 type NewsItem = {
   title: string;
@@ -73,10 +72,7 @@ async function fetchNews(categorySlug: string): Promise<NewsItem[]> {
 
   // Remove notícias que já viraram post
   const links = pool.map((i) => i.link);
-  const existing = await prisma.post.findMany({
-    where: { sourceUrl: { in: links } },
-    select: { sourceUrl: true },
-  });
+  const existing = await getPostsBySourceUrls(links);
   const used = new Set(existing.map((p) => p.sourceUrl));
   const fresh = pool.filter((i) => !used.has(i.link));
 
@@ -204,7 +200,7 @@ async function uniqueSlug(title: string): Promise<string> {
   const base = slugify(title) || "post";
   let slug = base;
   let n = 2;
-  while (await prisma.post.findUnique({ where: { slug } })) {
+  while (await slugExists(slug)) {
     slug = `${base}-${n++}`;
   }
   return slug;
@@ -218,18 +214,16 @@ export async function runRobot(categorySlug: string): Promise<Post> {
   const draft = await writePost(category.label, items);
   const slug = await uniqueSlug(draft.title);
 
-  return prisma.post.create({
-    data: {
-      title: draft.title,
-      slug,
-      excerpt: draft.excerpt,
-      content: draft.content,
-      category: category.slug,
-      tags: draft.tags.join(","),
-      sourceUrl: draft.source.link,
-      sourceName: draft.source.sourceName,
-      aiGenerated: true,
-      published: true,
-    },
+  return createPost({
+    title: draft.title,
+    slug,
+    excerpt: draft.excerpt,
+    content: draft.content,
+    category: category.slug,
+    tags: draft.tags.join(","),
+    sourceUrl: draft.source.link,
+    sourceName: draft.source.sourceName,
+    aiGenerated: true,
+    published: true,
   });
 }

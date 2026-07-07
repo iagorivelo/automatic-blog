@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createPost, slugExists } from "@/lib/posts";
 import { slugify } from "@/lib/utils";
 import { getCategory } from "@/lib/feeds";
 
@@ -31,20 +31,18 @@ export async function POST(request: Request) {
   const base = slugify(title) || "post";
   let slug = base;
   let n = 2;
-  while (await prisma.post.findUnique({ where: { slug } })) {
+  while (await slugExists(slug)) {
     slug = `${base}-${n++}`;
   }
 
-  const post = await prisma.post.create({
-    data: {
-      title: title.trim(),
-      slug,
-      excerpt: excerpt?.trim() || content.trim().slice(0, 200),
-      content: content.trim(),
-      category,
-      tags: tags?.trim() ?? "",
-      published: true,
-    },
+  const post = await createPost({
+    title: title.trim(),
+    slug,
+    excerpt: excerpt?.trim() || content.trim().slice(0, 200),
+    content: content.trim(),
+    category,
+    tags: tags?.trim() ?? "",
+    published: true,
   });
 
   return NextResponse.json({ ok: true, slug: post.slug });
