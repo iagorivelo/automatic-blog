@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/auth";
 import { runRobot } from "@/lib/robot";
 
-export const maxDuration = 120;
+// 60s é o teto do plano Hobby da Vercel; o robô costuma responder bem antes
+export const maxDuration = 60;
 
 export async function POST(request: Request) {
   if (!(await isAdmin())) {
