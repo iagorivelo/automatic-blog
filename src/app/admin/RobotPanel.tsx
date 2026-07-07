@@ -67,8 +67,8 @@ export function RobotPanel({ categories, auto }: Props) {
       <p className="mt-3 flex items-center gap-2 text-xs">
         {auto.cron ? (
           <span className="rounded-full bg-accent/10 px-2.5 py-1 font-medium text-accent">
-            Modo automático ativo via cron — publica uma categoria a cada ~30
-            min, todas ao longo do dia, sem precisar clicar
+            Modo automático ativo via cron — publica 3 posts de cada categoria
+            por dia (~18/dia), espaçados ao longo do dia, sem precisar clicar
           </span>
         ) : auto.enabled ? (
           <span className="rounded-full bg-accent/10 px-2.5 py-1 font-medium text-accent">

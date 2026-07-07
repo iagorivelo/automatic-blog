@@ -1,9 +1,10 @@
 name: Robô de notícias
 
 # Cron externo gratuito: bate no endpoint /api/cron a cada 30 min.
-# O endpoint é idempotente por dia — publica a próxima categoria que ainda não
-# saiu hoje e não faz nada quando todas já saíram. Assim os posts saem espaçados
-# ~30 min e o ciclo recomeça sozinho a cada dia.
+# O endpoint é idempotente por dia — publica a categoria menos atendida hoje até
+# cada uma bater a meta (3 posts/categoria/dia, ~18/dia), e não faz nada quando
+# todas já bateram. Assim os posts saem espaçados e o ciclo recomeça a cada dia.
+# Com 18 posts e ~30 min de intervalo, o dia é preenchido em ~9h.
 #
 # Configure em Settings > Secrets and variables > Actions:
 #   BLOG_URL     = https://seu-projeto.vercel.app   (sem barra no final)
