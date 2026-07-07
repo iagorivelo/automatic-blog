@@ -1,12 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CATEGORIES } from "@/lib/feeds";
 
 export default function NewPostPage() {
-  const router = useRouter();
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
@@ -30,7 +28,9 @@ export default function NewPostPage() {
         setError(data.error ?? "Erro ao salvar o post.");
         return;
       }
-      router.push(`/post/${data.slug}`);
+      // Navegação "dura" de propósito: um router.push seria interceptado
+      // pela rota @modal/(.)post e abriria o modal por cima do formulário
+      window.location.assign(`/post/${data.slug}`);
     } finally {
       setSaving(false);
     }

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import type { Metadata, Viewport } from "next";
+import { Geist, Geist_Mono, Newsreader } from "next/font/google";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,6 +14,12 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const newsreader = Newsreader({
+  variable: "--font-newsreader",
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+});
+
 export const metadata: Metadata = {
   title: {
     default: "Pulso — notícias em tempo real",
@@ -20,43 +27,31 @@ export const metadata: Metadata = {
   },
   description:
     "Blog minimalista com as notícias mais relevantes, selecionadas e redigidas automaticamente.",
+  openGraph: {
+    siteName: "Pulso",
+    locale: "pt_BR",
+    type: "website",
+  },
 };
 
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#faf9f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#100f0e" },
+  ],
+};
+
+export default function RootLayout({ children, modal }: LayoutProps<"/">) {
   return (
     <html
       lang="pt-BR"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${newsreader.variable} h-full antialiased`}
     >
       <body className="min-h-screen flex flex-col">
-        <header className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-md">
-          <div className="mx-auto flex h-14 w-full max-w-3xl items-center justify-between px-5">
-            <Link
-              href="/"
-              className="text-lg font-bold tracking-tight hover:text-accent transition-colors"
-            >
-              Pulso<span className="text-accent">.</span>
-            </Link>
-            <nav className="flex items-center gap-5 text-sm text-muted">
-              <Link href="/" className="hover:text-foreground transition-colors">
-                Início
-              </Link>
-            </nav>
-          </div>
-        </header>
-
+        <SiteHeader />
         <main className="flex-1 w-full">{children}</main>
-
-        <footer className="border-t border-border">
-          <div className="mx-auto flex w-full max-w-3xl items-center justify-between px-5 py-6 text-xs text-muted">
-            <span>© {new Date().getFullYear()} Pulso</span>
-            <span>Conteúdo selecionado e redigido com apoio de IA</span>
-          </div>
-        </footer>
+        <SiteFooter />
+        {modal}
       </body>
     </html>
   );
