@@ -1,0 +1,29 @@
+name: Robô de notícias
+
+# Cron externo gratuito: bate no endpoint /api/cron a cada 30 min.
+# O endpoint é idempotente por dia — publica a próxima categoria que ainda não
+# saiu hoje e não faz nada quando todas já saíram. Assim os posts saem espaçados
+# ~30 min e o ciclo recomeça sozinho a cada dia.
+#
+# Configure em Settings > Secrets and variables > Actions:
+#   BLOG_URL     = https://seu-projeto.vercel.app   (sem barra no final)
+#   CRON_SECRET  = o mesmo valor definido na Vercel
+#
+# Obs.: o cron do GitHub Actions roda em UTC e pode atrasar alguns minutos sob
+# carga; workflows agendados são pausados após 60 dias sem commits no repo.
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch:
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Acionar /api/cron
+        env:
+          BLOG_URL: ${{ secrets.BLOG_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          curl -fsS -X GET "$BLOG_URL/api/cron" \
+            -H "Authorization: Bearer $CRON_SECRET"

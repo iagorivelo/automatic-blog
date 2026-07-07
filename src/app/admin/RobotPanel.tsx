@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 type Props = {
   categories: { slug: string; label: string }[];
-  auto: { enabled: boolean; intervalMinutes: number };
+  auto: { enabled: boolean; intervalMinutes: number; cron?: boolean };
 };
 
 export function RobotPanel({ categories, auto }: Props) {
@@ -65,15 +65,20 @@ export function RobotPanel({ categories, auto }: Props) {
       </p>
 
       <p className="mt-3 flex items-center gap-2 text-xs">
-        {auto.enabled ? (
+        {auto.cron ? (
+          <span className="rounded-full bg-accent/10 px-2.5 py-1 font-medium text-accent">
+            Modo automático ativo via cron — publica uma categoria a cada ~30
+            min, todas ao longo do dia, sem precisar clicar
+          </span>
+        ) : auto.enabled ? (
           <span className="rounded-full bg-accent/10 px-2.5 py-1 font-medium text-accent">
             Modo automático ativo — uma categoria a cada{" "}
             {auto.intervalMinutes} min, sem precisar clicar
           </span>
         ) : (
           <span className="rounded-full bg-amber-500/10 px-2.5 py-1 font-medium text-amber-600 dark:text-amber-400">
-            Modo automático desativado — defina ROBOT_AUTO=&quot;true&quot; no
-            .env
+            Modo automático desativado — defina ROBOT_AUTO=&quot;true&quot;
+            (local) ou CRON_SECRET (Vercel)
           </span>
         )}
       </p>

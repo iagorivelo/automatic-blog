@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { prisma } from "@/lib/prisma";
+import { getPosts } from "@/lib/posts";
 import { CATEGORIES, getCategory } from "@/lib/feeds";
 import { formatDate } from "@/lib/utils";
 import { RobotPanel } from "./RobotPanel";
@@ -8,10 +8,7 @@ import { PostActions, LogoutButton } from "./actions-client";
 export const dynamic = "force-dynamic";
 
 export default async function AdminPage() {
-  const posts = await prisma.post.findMany({
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
+  const posts = await getPosts({ limit: 50 });
 
   return (
     <div className="mx-auto w-full max-w-3xl px-5 py-12">
@@ -41,6 +38,7 @@ export default async function AdminPage() {
             5,
             Number(process.env.ROBOT_INTERVAL_MINUTES) || 60
           ),
+          cron: Boolean(process.env.CRON_SECRET),
         }}
       />
 
